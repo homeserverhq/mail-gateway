@@ -227,10 +227,10 @@ submissioncleanup unix n - - - 0 cleanup
 
 EOF
 
-  if [ ! -f /etc/postfix/sasl_senders ]; then
-    touch /etc/postfix/sasl_senders
+  if [ ! -f /etc/postfix/sasl/sasl_senders ]; then
+    touch /etc/postfix/sasl/sasl_senders
   fi
-  postmap /etc/postfix/sasl_senders
+  postmap /etc/postfix/sasl/sasl_senders
 
   if [ -z ${DISABLE_AMAVIS+x} ]; then
     echo "AMAVIS - enabling spam/virus scanning"
