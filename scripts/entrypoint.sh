@@ -92,6 +92,15 @@ EOF
     dh512_file=/etc/postfix/tls/dh512.pem
   fi
 
+  if [ ! -f /etc/postfix/sasl/smtpd.conf ]; then
+    cat <<EOF > /etc/postfix/sasl/smtpd.conf
+pwcheck_method: auxprop
+auxprop_plugin: sasldb
+mech_list: PLAIN LOGIN
+sasldb_path: /etc/postfix/sasl/sasldb2
+EOF
+  fi
+
   cat <<EOF > /etc/postfix/main-new.cf
 ###### Host Settings ######
 
@@ -192,43 +201,23 @@ EOF
 submission inet n       -       n       -       -       smtpd
  -o syslog_name=postfix/submission
  -o smtpd_tls_security_level=encrypt
- -o smtpd_tls_auth_only=no
+ -o smtpd_tls_auth_only=yes
  -o smtpd_tls_req_ccert=yes
- -o smtpd_reject_unlisted_recipient=no
+ -o smtpd_reject_unlisted_recipient=yes
  -o smtpd_client_restrictions=
  -o smtpd_helo_restrictions=
- -o smtpd_sender_restrictions=
+ -o smtpd_sender_restrictions=reject_sender_login_mismatch
+ -o smtpd_recipient_restrictions=permit_sasl_authenticated,reject
+ -o smtpd_relay_restrictions=permit_sasl_authenticated,reject
  -o milter_macro_daemon_name=ORIGINATING
  -o cleanup_service_name=submissioncleanup
  -o smtpd_tls_CAfile=/etc/postfix/tls/$INTERNAL_CA_CERT_FILENAME
+ -o smtpd_sasl_auth_enable=yes
+ -o smtpd_sasl_security_options=noanonymous
+ -o cyrus_sasl_config_path=/etc/postfix/sasl
+ -o smtpd_sasl_local_domain=mail-gateway
+ -o smtpd_sender_login_maps=hash:/etc/postfix/sasl/sasl_senders
 EOF
-
-  if [ "$CERT_AUTH_METHOD" = "ca" ]; then
-    if [ ! -f /etc/postfix/tls/$INTERNAL_CA_CERT_FILENAME ]; then
-      echo "Certificate Authorization - missing CA certificate, exiting..."
-      exit 2
-    fi
-    cat <<EOF >> /etc/postfix/master-new.cf
- -o smtpd_recipient_restrictions=permit_tls_all_clientcerts,reject
- -o smtpd_relay_restrictions=permit_tls_all_clientcerts,reject
-
-EOF
-  elif [ "$CERT_AUTH_METHOD" = "fingerprint" ]; then
-    if [ ! -f /etc/postfix/tls/relay_clientcerts ]; then
-      echo "Certificate Authorization - missing certificate fingerprints, creating empty file..."
-      touch /etc/postfix/tls/relay_clientcerts
-    fi
-    postmap /etc/postfix/tls/relay_clientcerts
-    cat <<EOF >> /etc/postfix/master-new.cf
- -o smtpd_recipient_restrictions=permit_tls_clientcerts,reject
- -o smtpd_relay_restrictions=permit_tls_clientcerts,reject
- -o relay_clientcerts=hash:/etc/postfix/tls/relay_clientcerts
-
-EOF
-  else
-    echo "Certificate Authorization - method not found, exiting..."
-    exit 4
-  fi
 
   # Performs header checks for submission emails in separate cleanup process
   cat <<EOF >> /etc/postfix/master-new.cf
@@ -237,6 +226,11 @@ submissioncleanup unix n - - - 0 cleanup
  -o mime_header_checks=regexp:/etc/postfix/additional/header_checks
 
 EOF
+
+  if [ ! -f /etc/postfix/sasl_senders ]; then
+    touch /etc/postfix/sasl_senders
+  fi
+  postmap /etc/postfix/sasl_senders
 
   if [ -z ${DISABLE_AMAVIS+x} ]; then
     echo "AMAVIS - enabling spam/virus scanning"
