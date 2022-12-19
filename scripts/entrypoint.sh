@@ -230,7 +230,6 @@ EOF
 submissioncleanup unix n - - - 0 cleanup
  -o header_checks=regexp:/etc/postfix/additional/header_checks
  -o mime_header_checks=regexp:/etc/postfix/additional/header_checks
-
 EOF
 
   if [ ! -f /etc/postfix/sasl/sasl_senders ]; then
@@ -245,7 +244,6 @@ EOF
 ### Amavis ###
 content_filter = smtp-amavis:[127.0.0.1]:10024
 receive_override_options = no_address_mappings
-
 EOF
 
     cat <<EOF >> /etc/postfix/master-new.cf
@@ -270,7 +268,6 @@ smtp-amavis  unix    -    -    n    -    2    smtp
  -o smtpd_hard_error_limit=1000
  -o receive_override_options=no_header_body_checks
  -o smtp_tls_security_level=none
-
 EOF
 
     echo 'use strict;' > /etc/amavis/conf.d/15-content_filter_mode
