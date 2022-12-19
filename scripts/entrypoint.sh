@@ -18,7 +18,6 @@ if [ ! -f "$INITIALIZED" ]; then
 
   if [ -z ${MAIL_FQDN+x} ] || \
      [ -z ${POSTMASTER_ADDRESS+x} ] || \
-     [ -z ${CERT_AUTH_METHOD+x} ] || \
      [ ! -f /etc/postfix/tls/$SSL_CERT_FILENAME ] || \
      [ ! -f /etc/postfix/tls/$SSL_KEY_FILENAME ]; then
     echo "Missing required environment variables or certificates, exiting..."
@@ -99,6 +98,13 @@ auxprop_plugin: sasldb
 mech_list: PLAIN LOGIN
 sasldb_path: /etc/postfix/sasl/sasldb2
 EOF
+  fi
+
+  if [ ! -f /etc/postfix/sasl/sasldb2 ]; then
+    tmppw=$(openssl rand -hex 32)
+    echo $tmppw | saslpasswd2 -c -p -f /etc/postfix/sasl/sasldb2 tempuser
+    saslpasswd2 -d -f /etc/postfix/sasl/sasldb2 tempuser
+    chown postfix:sasl /etc/postfix/sasl/sasldb2
   fi
 
   cat <<EOF > /etc/postfix/main-new.cf
