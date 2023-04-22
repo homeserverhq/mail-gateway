@@ -46,17 +46,17 @@ if [ ! -f "$INITIALIZED" ]; then
     QUEUE_LIFETIME_MAX=$POSTFIX_QUEUE_LIFETIME_MAX
   fi
 
-  if [ ! -f /etc/postfix/additional/transport ]; then
+  if [ ! -f /etc/postfix/config/transport ]; then
     echo "Transport map is empty, no emails will be relayed. Creating empty file..."
-    touch /etc/postfix/additional/transport
+    touch /etc/postfix/config/transport
   fi
-  postmap /etc/postfix/additional/transport
+  postmap /etc/postfix/config/transport
 
-  if [ ! -f /etc/postfix/additional/relay ]; then
+  if [ ! -f /etc/postfix/config/relay ]; then
     echo "No relay domains are specified, no emails will be relayed. Creating empty file..."
-    touch /etc/postfix/additional/relay
+    touch /etc/postfix/config/relay
   fi
-  postmap /etc/postfix/additional/relay
+  postmap /etc/postfix/config/relay
 
   if [ -z ${ABUSE_ADDRESS+x} ]; then
     ABUSE_ADDRESS=$POSTMASTER_ADDRESS
@@ -69,16 +69,16 @@ abuse    $ABUSE_ADDRESS
 EOF
   postmap /etc/postfix/virtual
 
-  if [ ! -f /etc/postfix/additional/header_checks ]; then
+  if [ ! -f /etc/postfix/config/header_checks ]; then
     echo "No header checks file. Creating empty file..."
-    touch /etc/postfix/additional/header_checks
+    touch /etc/postfix/config/header_checks
   fi
 
-  if [ ! -f /etc/postfix/additional/sasl_passwd ]; then
+  if [ ! -f /etc/postfix/config/sasl_passwd ]; then
     echo "No forward relay hosts credentials file. Creating empty file..."
-    touch /etc/postfix/additional/sasl_passwd
+    touch /etc/postfix/config/sasl_passwd
   fi
-  postmap /etc/postfix/additional/sasl_passwd
+  postmap /etc/postfix/config/sasl_passwd
 
   dh1024_file=/etc/postfix/dh1024.pem
   dh512_file=/etc/postfix/dh512.pem
@@ -91,20 +91,20 @@ EOF
     dh512_file=/etc/postfix/tls/dh512.pem
   fi
 
-  if [ ! -f /etc/postfix/sasl/smtpd.conf ]; then
-    cat <<EOF > /etc/postfix/sasl/smtpd.conf
+  if [ ! -f /etc/postfix/config/smtpd.conf ]; then
+    cat <<EOF > /etc/postfix/config/smtpd.conf
 pwcheck_method: auxprop
 auxprop_plugin: sasldb
 mech_list: PLAIN LOGIN
-sasldb_path: /etc/postfix/sasl/sasldb2
+sasldb_path: /etc/postfix/config/sasldb2
 EOF
   fi
 
-  if [ ! -f /etc/postfix/sasl/sasldb2 ]; then
+  if [ ! -f /etc/postfix/config/sasldb2 ]; then
     tmppw=$(openssl rand -hex 32)
-    echo $tmppw | saslpasswd2 -c -p -f /etc/postfix/sasl/sasldb2 tempuser
-    saslpasswd2 -d -f /etc/postfix/sasl/sasldb2 tempuser
-    chown postfix:sasl /etc/postfix/sasl/sasldb2
+    echo $tmppw | saslpasswd2 -c -p -f /etc/postfix/config/sasldb2 tempuser
+    saslpasswd2 -d -f /etc/postfix/config/sasldb2 tempuser
+    chown postfix:sasl /etc/postfix/config/sasldb2
   fi
 
   cat <<EOF > /etc/postfix/main-new.cf
@@ -130,8 +130,8 @@ alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
 local_recipient_maps = 
 local_transport = error:local mail delivery is disabled
-transport_maps = hash:/etc/postfix/additional/transport
-relay_domains = hash:/etc/postfix/additional/relay
+transport_maps = hash:/etc/postfix/config/transport
+relay_domains = hash:/etc/postfix/config/relay
 virtual_alias_maps = hash:/etc/postfix/virtual
 smtpd_helo_required = yes
 bounce_queue_lifetime = $QUEUE_LIFETIME_BOUNCE
@@ -163,7 +163,7 @@ smtpd_relay_restrictions =
 
 smtp_sasl_auth_enable = yes
 smtp_sasl_security_options = noanonymous
-smtp_sasl_password_maps = hash:/etc/postfix/additional/sasl_passwd
+smtp_sasl_password_maps = hash:/etc/postfix/config/sasl_passwd
 
 ##### TLS Settings ######
 
@@ -220,22 +220,22 @@ submission inet n       -       n       -       -       smtpd
  -o smtpd_tls_CAfile=/etc/postfix/tls/$INTERNAL_CA_CERT_FILENAME
  -o smtpd_sasl_auth_enable=yes
  -o smtpd_sasl_security_options=noanonymous
- -o cyrus_sasl_config_path=/etc/postfix/sasl
+ -o cyrus_sasl_config_path=/etc/postfix/config
  -o smtpd_sasl_local_domain=mail-gateway
- -o smtpd_sender_login_maps=hash:/etc/postfix/sasl/sasl_senders
+ -o smtpd_sender_login_maps=hash:/etc/postfix/config/sasl_senders
 EOF
 
   # Performs header checks for submission emails in separate cleanup process
   cat <<EOF >> /etc/postfix/master-new.cf
 submissioncleanup unix n - - - 0 cleanup
- -o header_checks=regexp:/etc/postfix/additional/header_checks
- -o mime_header_checks=regexp:/etc/postfix/additional/header_checks
+ -o header_checks=regexp:/etc/postfix/config/header_checks
+ -o mime_header_checks=regexp:/etc/postfix/config/header_checks
 EOF
 
-  if [ ! -f /etc/postfix/sasl/sasl_senders ]; then
-    touch /etc/postfix/sasl/sasl_senders
+  if [ ! -f /etc/postfix/config/sasl_senders ]; then
+    touch /etc/postfix/config/sasl_senders
   fi
-  postmap /etc/postfix/sasl/sasl_senders
+  postmap /etc/postfix/config/sasl_senders
 
   if [ -z ${DISABLE_AMAVIS+x} ]; then
     echo "AMAVIS - enabling spam/virus scanning"
