@@ -37,7 +37,7 @@ RUN su - amavis -s /bin/bash -c 'razor-admin -create; razor-admin -register; pyz
 
 COPY . /container/
 
-VOLUME ["/etc/postfix/tls", "/etc/postfix/additional"]
+VOLUME ["/etc/postfix/tls", "/etc/postfix/config"]
 HEALTHCHECK CMD ["/container/scripts/docker-healthcheck.sh"]
 ENTRYPOINT ["entrypoint.sh"]
 
