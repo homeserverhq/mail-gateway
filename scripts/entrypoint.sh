@@ -91,7 +91,7 @@ EOF
     dh512_file=/etc/postfix/tls/dh512.pem
   fi
 
-  if [ ! -f /etc/postfix/config/smtpd.conf ]; then
+  if [ ! -f /etc/postfix/sasl/smtpd.conf ]; then
     cat <<EOF > /etc/postfix/sasl/smtpd.conf
 pwcheck_method: auxprop
 auxprop_plugin: sasldb
@@ -220,7 +220,7 @@ submission inet n       -       n       -       -       smtpd
  -o smtpd_tls_CAfile=/etc/postfix/tls/$INTERNAL_CA_CERT_FILENAME
  -o smtpd_sasl_auth_enable=yes
  -o smtpd_sasl_security_options=noanonymous
- -o cyrus_sasl_config_path=/etc/postfix/config
+ -o cyrus_sasl_config_path=/etc/postfix/sasl
  -o smtpd_sasl_local_domain=mail-gateway
  -o smtpd_sender_login_maps=hash:/etc/postfix/config/sasl_senders
 EOF
