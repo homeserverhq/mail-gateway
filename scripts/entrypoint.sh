@@ -92,19 +92,19 @@ EOF
   fi
 
   if [ ! -f /etc/postfix/config/smtpd.conf ]; then
-    cat <<EOF > /etc/postfix/config/smtpd.conf
+    cat <<EOF > /etc/postfix/sasl/smtpd.conf
 pwcheck_method: auxprop
 auxprop_plugin: sasldb
 mech_list: PLAIN LOGIN
-sasldb_path: /etc/postfix/config/sasldb2
+sasldb_path: /etc/postfix/sasl/sasldb2
 EOF
   fi
 
-  if [ ! -f /etc/postfix/config/sasldb2 ]; then
+  if [ ! -f /etc/postfix/sasl/sasldb2 ]; then
     tmppw=$(openssl rand -hex 32)
-    echo $tmppw | saslpasswd2 -c -p -f /etc/postfix/config/sasldb2 tempuser
-    saslpasswd2 -d -f /etc/postfix/config/sasldb2 tempuser
-    chown postfix:sasl /etc/postfix/config/sasldb2
+    echo $tmppw | saslpasswd2 -c -p -f /etc/postfix/sasl/sasldb2 tempuser
+    saslpasswd2 -d -f /etc/postfix/sasl/sasldb2 tempuser
+    chown postfix:sasl /etc/postfix/sasl/sasldb2
   fi
 
   cat <<EOF > /etc/postfix/main-new.cf
