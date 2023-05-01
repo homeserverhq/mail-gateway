@@ -204,7 +204,7 @@ EOF
   cp /etc/postfix/master.cf /etc/postfix/master-new.cf
   cat <<EOF >> /etc/postfix/master-new.cf
 
-submission inet n       -       n       -       -       smtpd
+submission inet n - n - - smtpd
  -o syslog_name=postfix/submission
  -o smtpd_tls_security_level=encrypt
  -o smtpd_tls_auth_only=yes
@@ -230,6 +230,12 @@ EOF
 submissioncleanup unix n - - - 0 cleanup
  -o header_checks=regexp:/etc/postfix/config/header_checks
  -o mime_header_checks=regexp:/etc/postfix/config/header_checks
+EOF
+
+  # Performs SPF checks
+  cat <<EOF >> /etc/postfix/master-new.cf
+policyd-spf unix - n n - 0 spawn
+    user=policyd-spf argv=/usr/bin/policyd-spf
 EOF
 
   if [ ! -f /etc/postfix/config/sasl_senders ]; then
