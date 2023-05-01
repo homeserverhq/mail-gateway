@@ -190,8 +190,8 @@ if [ -z ${DISABLE_STRICT_DKIM+x} ]; then
 ##### DKIM Settings ######
 milter_default_action = accept
 milter_protocol = 6
-smtpd_milters = local:/run/opendkim/opendkim.sock
-non_smtpd_milters = local:/run/opendkim/opendkim.sock
+smtpd_milters = local:opendkim/opendkim.sock
+non_smtpd_milters = local:opendkim/opendkim.sock
 
 EOF
 fi
