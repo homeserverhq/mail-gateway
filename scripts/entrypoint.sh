@@ -155,6 +155,8 @@ EOF
 
 if [ -z ${DISABLE_STRICT_SPF+x} ]; then
   cat <<EOF >> /etc/postfix/main-new.cf
+policyd-spf_time_limit = 3600
+
 smtpd_recipient_restrictions = 
     reject_unauth_destination,
     reject_unknown_sender_domain,
