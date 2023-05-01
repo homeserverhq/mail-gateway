@@ -154,7 +154,8 @@ smtpd_sender_restrictions =
 smtpd_recipient_restrictions = 
     reject_unauth_destination,
     reject_unknown_sender_domain,
-    reject_unauth_pipelining
+    reject_unauth_pipelining,
+    check_policy_service unix:private/policyd-spf
 
 smtpd_relay_restrictions = 
     reject_unauth_destination
