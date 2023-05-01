@@ -107,11 +107,6 @@ EOF
     chown postfix:sasl /etc/postfix/sasl/sasldb2
   fi
 
-if [ -z ${DISABLE_STRICT_DKIM+x} ]; then
-  mkdir /var/spool/postfix/opendkim
-  chown opendkim:postfix /var/spool/postfix/opendkim
-fi
-
   cat <<EOF > /etc/postfix/main-new.cf
 ###### Host Settings ######
 
@@ -195,8 +190,8 @@ if [ -z ${DISABLE_STRICT_DKIM+x} ]; then
 ##### DKIM Settings ######
 milter_default_action = accept
 milter_protocol = 6
-smtpd_milters = local:opendkim/opendkim.sock
-non_smtpd_milters = local:opendkim/opendkim.sock
+smtpd_milters = inet:127.0.0.1:54321
+non_smtpd_milters = inet:127.0.0.1:54321
 
 EOF
 fi
