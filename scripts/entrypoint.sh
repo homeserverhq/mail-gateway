@@ -107,6 +107,11 @@ EOF
     chown postfix:sasl /etc/postfix/sasl/sasldb2
   fi
 
+if [ -z ${DISABLE_STRICT_DKIM+x} ]; then
+  mkdir /var/spool/postfix/opendkim
+  chown opendkim:postfix /var/spool/postfix/opendkim
+fi
+
   cat <<EOF > /etc/postfix/main-new.cf
 ###### Host Settings ######
 
