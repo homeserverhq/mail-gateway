@@ -190,8 +190,8 @@ if [ -z ${DISABLE_STRICT_DKIM+x} ]; then
 ##### DKIM Settings ######
 milter_default_action = accept
 milter_protocol = 6
-smtpd_milters = inet:127.0.0.1:54321
-non_smtpd_milters = inet:127.0.0.1:54321
+smtpd_milters = inet:127.0.0.1:8891
+non_smtpd_milters = inet:127.0.0.1:8891
 
 EOF
 fi
