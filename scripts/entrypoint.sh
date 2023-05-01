@@ -151,12 +151,28 @@ smtpd_sender_restrictions =
     reject_unknown_sender_domain,
     reject_unauth_pipelining
 
+EOF
+
+if [ -z ${DISABLE_STRICT_SPF+x} ]; then
+  cat <<EOF >> /etc/postfix/main-new.cf
 smtpd_recipient_restrictions = 
     reject_unauth_destination,
     reject_unknown_sender_domain,
     reject_unauth_pipelining,
     check_policy_service unix:private/policyd-spf
 
+EOF
+else
+  cat <<EOF >> /etc/postfix/main-new.cf
+smtpd_recipient_restrictions = 
+    reject_unauth_destination,
+    reject_unknown_sender_domain,
+    reject_unauth_pipelining
+
+EOF
+fi
+
+cat <<EOF >> /etc/postfix/main-new.cf
 smtpd_relay_restrictions = 
     reject_unauth_destination
 
