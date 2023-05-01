@@ -184,6 +184,18 @@ smtp_sasl_auth_enable = yes
 smtp_sasl_security_options = noanonymous
 smtp_sasl_password_maps = hash:/etc/postfix/config/sasl_passwd
 
+EOF
+if [ -z ${DISABLE_STRICT_DKIM+x} ]; then
+  cat <<EOF >> /etc/postfix/main-new.cf
+##### DKIM Settings ######
+milter_default_action = accept
+milter_protocol = 6
+smtpd_milters = local:/run/opendkim/opendkim.sock
+non_smtpd_milters = local:/run/opendkim/opendkim.sock
+
+EOF
+fi
+  cat <<EOF >> /etc/postfix/main-new.cf
 ##### TLS Settings ######
 
 # Outgoing Connections #
