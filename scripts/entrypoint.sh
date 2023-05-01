@@ -242,6 +242,7 @@ submission inet n - n - - smtpd
  -o cyrus_sasl_config_path=/etc/postfix/sasl
  -o smtpd_sasl_local_domain=mail-gateway
  -o smtpd_sender_login_maps=hash:/etc/postfix/config/sasl_senders
+ -o content_filter=
 EOF
 
   # Performs header checks for submission emails in separate cleanup process
